@@ -1,7 +1,7 @@
 import random
 import types
 
-from util import random_bit_string, xor_bits, flip_bit, sha256_of_bits
+from util import random_bit_string, xor_bits, flip_bit, sha256_of_bits, H
 
 
 def preprocess(l, T, m, k=12):
@@ -39,16 +39,17 @@ def queryThreshold(i, l,m,k,C,P):
             return xor_bits(a[k:])
 
 class Process:
-    def __init__(self, id, shared):
+    def __init__(self, id, A, present):
         self.id = id
-        self.shared = shared
+        self.A = A
+        self.present = present
 
     def approximate_agreement(self, inp, s):
         i = inp
         for r in range(0, s):
-            self.shared[r][i % 2] = i
+            self.A[r][i % 2] = i
             yield
-            i_tag = self.shared[r][(i+1) % 2]
+            i_tag = self.A[r][(i+1) % 2]
             yield
             if i_tag == None:
                 i = 2*i
@@ -58,5 +59,27 @@ class Process:
 
     def treshold_conciliator(self, inp, f, s):
         for i in self.approximate_agreement(inp, s): yield
-        print(f'[{self.id}: {i}]')
         yield f(i)
+
+    def adopt_commit(self, r, v):
+        pass
+
+    def oracle_conciliator(self, r, v, nonce):
+        self.present[r][v] = 1
+        if self.present[r][1 - v] == 0:
+            return v
+        else:
+            return H(r, nonce)
+
+    def consensus(self, inp, f, s, nonce):
+        for v in self.treshold_conciliator(inp, f, s): yield
+        for a, v in self.adopt_commit(1, v): yield
+        if a == 'commit':
+            yield v
+        r = 0
+        while True:
+            v = self.oracle_conciliator(r,v,nonce)
+            for a, v in self.adopt_commit(r, v): yield
+            if a == 'commit':
+                yield v
+                return

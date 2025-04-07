@@ -13,7 +13,8 @@ def f(i):
 process_inputs = [random.randint(2, s) for i in range(n)]
 
 A = [[None]*2]*s
-processes = [Process(i, A) for i in range(n)]
+present = [[None]*2]*s
+processes = [Process(i, A, present) for i in range(n)]
 generators = {}
 return_values = {}
 stopped = set()

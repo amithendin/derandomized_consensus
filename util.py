@@ -61,3 +61,19 @@ def sha256_of_bits(bit_string):
     sha256_hash = hashlib.sha256(bytes_array)
 
     return sha256_hash.hexdigest()
+
+def H(x,y):
+    x_str = str(x).encode('utf-8')
+    y_str = str(y).encode('utf-8')
+    x_hash = hashlib.sha256(x_str).digest()
+    y_hash = hashlib.sha256(y_str).digest()
+
+    combined_hash = x_hash + y_hash
+
+    result_bit = 0
+    for byte in combined_hash:
+        for i in range(8):
+            bit = (byte >> i) & 1
+            result_bit ^= bit
+
+    return result_bit
