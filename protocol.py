@@ -1,4 +1,6 @@
 import random
+import types
+
 from util import random_bit_string, xor_bits, flip_bit, sha256_of_bits
 
 
@@ -24,8 +26,9 @@ def preprocess(l, T, m, k=12):
     return C, P
 
 def queryThreshold(i, l,m,k,C,P):
-    if i > l:
-        raise Exception("i must be less than l")
+    i = i % l
+    # if i > l:
+    #     raise Exception("i must be less than l")
     if k > m:
         raise Exception("k must be less than m")
 
@@ -42,7 +45,7 @@ class Process:
 
     def approximate_agreement(self, inp, s):
         i = inp
-        for r in range(1, s+1):
+        for r in range(0, s):
             self.shared[r][i % 2] = i
             yield
             i_tag = self.shared[r][(i+1) % 2]
@@ -55,4 +58,7 @@ class Process:
 
     def treshold_conciliator(self, inp, f, s):
         i = self.approximate_agreement(inp, s)
+        while isinstance(i, types.GeneratorType):
+            yield i
+        print(f'[{self.id}: {i}]')
         return f(i)
