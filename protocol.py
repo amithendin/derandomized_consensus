@@ -54,11 +54,9 @@ class Process:
                 i = 2*i
             else:
                 i = i + i_tag
-        return i
+        yield i
 
     def treshold_conciliator(self, inp, f, s):
-        i = self.approximate_agreement(inp, s)
-        while isinstance(i, types.GeneratorType):
-            yield i
+        for i in self.approximate_agreement(inp, s): yield
         print(f'[{self.id}: {i}]')
-        return f(i)
+        yield f(i)
