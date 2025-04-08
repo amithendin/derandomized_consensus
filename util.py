@@ -77,3 +77,10 @@ def H(x,y):
             result_bit ^= bit
 
     return result_bit
+
+
+def find_i_tuple(tuple_set, i, v):
+    for t in tuple_set:
+        if t[i] == v:
+            return t
+    return None
