@@ -70,31 +70,31 @@ class Process:
     # the adopt-commit protocol from https://www.cs.tau.ac.il/~afek/EliRndByRndpodc98.pdf page 149
     def adopt_commit(self, r, vi):
         i = self.id
-        self.D[r][1][i] = vi # write vi to Ci,1
-        yield
+        self.D[r][0][i] = vi # write vi to Ci,1
+        yield None, None
         # V:= U_j=1...n read Cj,1
         V = set()
-        for j in range(len(self.D[r][1])):
-            V.add(self.D[r][1][j])
-            yield
+        for j in range(len(self.D[r][0])):
+            V.add(self.D[r][0][j])
+            yield None, None
         #if V - {\perp} = {v}
-        V.remove(None)
+        if None in V: V.remove(None)
         if len(V) == 1:
             v = V.pop()
-            self.D[r][2][i] = ('commit', v)
+            self.D[r][1][i] = ('commit', v)
         else:
-            self.D[r][2][i] = ('adopt', vi)
-        yield
+            self.D[r][1][i] = ('adopt', vi)
+        yield None, None
         # V:= U_j=1...n read C2,1
         V.clear()
-        for j in range(len(self.D[r][2])):
-            V.add(self.D[r][2][j])
-            yield
+        for j in range(len(self.D[r][1])):
+            V.add(self.D[r][1][j])
+            yield None, None
         #if V - {\perp} = 'commit v'
-        V.remove(None)
+        if None in V: V.remove(None)
         V = list(V)
         if len(V) == 1 and V[0][0] == 'commit':
-            yield v
+            yield V[0]
         else: #else if 'commit v' \in V
             v = find_i_tuple(V, 0, 'commit')
             if v is not None:
@@ -113,13 +113,15 @@ class Process:
     # consensus protocol from the article
     def consensus(self, inp, f, s, nonce):
         for v in self.treshold_conciliator(inp, f, s): yield
-        for a, v in self.adopt_commit(1, v): yield
+        for a, v_tag in self.adopt_commit(1, v): yield
+        v = v_tag
         if a == 'commit':
             yield v
-        r = 0
-        while True:
+
+        for r in range(len(self.D)):
             v = self.oracle_conciliator(r,v,nonce)
-            for a, v in self.adopt_commit(r, v): yield
+            for a, v_tag in self.adopt_commit(r, v): yield
+            v = v_tag
             if a == 'commit':
                 yield v
                 return
