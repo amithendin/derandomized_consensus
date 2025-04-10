@@ -2,12 +2,12 @@ import random
 from pprint import pprint
 from protocol import *
 
-# random.seed(4662)
+random.seed(42)
 
-s = 50 # range of values for Approximate Agreement
+s = 10 # range of values for Approximate Agreement
 n = 10 # number of processes
-l = 1024 # range of the threshold / number of hashes in the obfuscation
-T = 643 # threshold value
+l = 2**s+1 # range of the threshold / number of hashes in the obfuscation
+T = random.randint(2,l-1) # threshold value must be < l
 m = 10 # length of a single hash
 k = 5 # length of preimage nonce
 w = 500 # number of adopt-commit objects, (theoretically, needs to be infinite)
@@ -17,7 +17,7 @@ present = [[0 for _ in range(2)] for __ in range(w)] # shared registers for Orac
 D = [[[None for _ in range(n)] for __ in range(2)] for ___ in range(w)]# shared registers for adopt-commit objects
 
 # generate random binary input values for processes
-process_inputs = [1 for i in range(n)]#[random.randint(0, 1) for i in range(n)]
+process_inputs = [random.randint(0, 1) for i in range(n)]
 
 # compute obfuscation
 C, P = preprocess(l,T,m,k)

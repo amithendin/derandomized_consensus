@@ -27,9 +27,8 @@ def preprocess(l, T, m, k=12):
 
 # the probeThreshold algorithm from the article
 def queryThreshold(i, l,m,k,C,P):
-    i = i % l
-    # if i > l:
-    #     raise Exception("i must be less than l")
+    if i > l - 1:
+        raise Exception("i must be less than l")
     if k > m:
         raise Exception("k must be less than m")
 
@@ -124,4 +123,4 @@ class Process:
             v = v_tag
             if a == 'commit':
                 yield v
-                return
+                break
